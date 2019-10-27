@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Example_2
+namespace Example_3
 {
     class Program
     {
@@ -14,10 +14,10 @@ namespace Example_2
             var stockObservable = new Observable<Stock>();
 
             var microsoftObserver = new MicrosoftStockObserver();
-            stockObservable.Register(microsoftObserver);
+            stockObservable.Subscribe(microsoftObserver);
 
             var googleObserver = new GoogleStockObserver();
-            stockObservable.Register(googleObserver);
+            stockObservable.Subscribe(googleObserver);
 
             var stockSimulator = new StockSimulator();
             foreach (var stock in stockSimulator)
@@ -46,7 +46,7 @@ namespace Example_2
 
         public class Observer<T>
         {
-            public virtual void Update(T data) { }            
+            public virtual void Update(T data) { }
         }
 
         public class Observable<T>
@@ -57,21 +57,18 @@ namespace Example_2
             public T Subject
             {
                 get => subject;
-                set 
+                set
                 {
                     subject = value;
                     Notify();
                 }
             }
 
-            public void Register(Observer<T> observer)
+            public Unsubscriber<T> Subscribe(Observer<T> observer)
             {
-                observers.Add(observer);
-            }
-
-            public void Unregister(Observer<T> observer)
-            {
-                observers.Remove(observer);
+                if(!observers.Contains(observer))
+                    observers.Add(observer);
+                return new Unsubscriber<T>(observers, observer);
             }
 
             public void Notify()
@@ -80,6 +77,23 @@ namespace Example_2
                 {
                     observer.Update(subject);
                 }
+            }
+        }
+
+        public class Unsubscriber<T> : IDisposable
+        {
+            private List<Observer<T>> observers;
+            private Observer<T> observer;
+
+            public Unsubscriber(List<Observer<T>> observers, Observer<T> observer)
+            {
+                this.observers = observers;
+                this.observer = observer;
+            }
+
+            public void Dispose()
+            {
+                observers.Remove(observer);
             }
         }
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Example_2
+namespace Example_4
 {
     class Program
     {
@@ -14,14 +14,23 @@ namespace Example_2
             var stockObservable = new Observable<Stock>();
 
             var microsoftObserver = new MicrosoftStockObserver();
-            stockObservable.Register(microsoftObserver);
+            microsoftObserver.Subscribe(stockObservable);
 
             var googleObserver = new GoogleStockObserver();
-            stockObservable.Register(googleObserver);
+            googleObserver.Subscribe(stockObservable);
 
-            var stockSimulator = new StockSimulator();
-            foreach (var stock in stockSimulator)
-                stockObservable.Subject = stock;
+            stockObservable.Subject = new Stock("Microsoft", 10);
+            microsoftObserver.Unsubscribe();
+            stockObservable.Subject = new Stock("Microsoft", 20);
+            stockObservable.Subject = new Stock("Microsoft", 30);
+            microsoftObserver.Subscribe(stockObservable);
+            stockObservable.Subject = new Stock("Microsoft", 40);
+            stockObservable.Subject = new Stock("Google", 60);
+            googleObserver.Unsubscribe();
+            stockObservable.Subject = new Stock("Google", 70);
+            stockObservable.Subject = new Stock("Google", 80);
+            googleObserver.Subscribe(stockObservable);
+            stockObservable.Subject = new Stock("Google", 90);
 
             Console.ReadLine();
         }
@@ -46,7 +55,18 @@ namespace Example_2
 
         public class Observer<T>
         {
-            public virtual void Update(T data) { }            
+            private Unsubscriber<T> cancellation;
+
+            public virtual void Update(T data) { }
+            public void Subscribe(Observable<T> provider)
+            {
+                cancellation = provider.Subscribe(this);
+            }
+
+            public virtual void Unsubscribe()
+            {
+                cancellation.Dispose();
+            }
         }
 
         public class Observable<T>
@@ -57,21 +77,18 @@ namespace Example_2
             public T Subject
             {
                 get => subject;
-                set 
+                set
                 {
                     subject = value;
                     Notify();
                 }
             }
 
-            public void Register(Observer<T> observer)
+            public Unsubscriber<T> Subscribe(Observer<T> observer)
             {
-                observers.Add(observer);
-            }
-
-            public void Unregister(Observer<T> observer)
-            {
-                observers.Remove(observer);
+                if (!observers.Contains(observer))
+                    observers.Add(observer);
+                return new Unsubscriber<T>(observers, observer);
             }
 
             public void Notify()
@@ -80,6 +97,23 @@ namespace Example_2
                 {
                     observer.Update(subject);
                 }
+            }
+        }
+
+        public class Unsubscriber<T> : IDisposable
+        {
+            private List<Observer<T>> observers;
+            private Observer<T> observer;
+
+            public Unsubscriber(List<Observer<T>> observers, Observer<T> observer)
+            {
+                this.observers = observers;
+                this.observer = observer;
+            }
+
+            public void Dispose()
+            {
+                observers.Remove(observer);
             }
         }
 
