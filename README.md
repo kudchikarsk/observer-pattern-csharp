@@ -3,7 +3,7 @@
 This solution is a part of my blog post [Observer Pattern C#](https://kudchikarsk.com/observer-pattern-csharp/)
 
 
-Solution contains various Windows Forms App / Console App Project for different Publisher-Subscriber Design Pattern concepts in C#.
+Solution contains various Windows Forms App / Console App Project for different Observer Pattern C# concepts in C#.
 
 
 #### To run a particular project
