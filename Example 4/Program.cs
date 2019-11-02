@@ -53,11 +53,11 @@ namespace Example_4
             }
         }
 
-        public class Observer<T>
+        public abstract class Observer<T>
         {
             private Unsubscriber<T> cancellation;
 
-            public virtual void Update(T data) { }
+            public abstract void Update(T data);
             public void Subscribe(Observable<T> provider)
             {
                 cancellation = provider.Subscribe(this);

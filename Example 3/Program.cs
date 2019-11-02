@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Example_3
 {
@@ -26,32 +23,32 @@ namespace Example_3
             Console.ReadLine();
         }
 
-        public class GoogleStockObserver : Observer<Stock>
+        public class GoogleStockObserver : IObserver<Stock>
         {
-            public override void Update(Stock data)
+            public void Update(Stock data)
             {
                 if (data.Name == "Google" && data.Price > 50)
                     Console.WriteLine($"Google has reached the target price {data.Price}");
             }
         }
 
-        public class MicrosoftStockObserver : Observer<Stock>
+        public class MicrosoftStockObserver : IObserver<Stock>
         {
-            public override void Update(Stock data)
+            public void Update(Stock data)
             {
                 if (data.Name == "Microsoft")
                     Console.WriteLine($"Microsoft new price is {data.Price}");
             }
         }
 
-        public class Observer<T>
+        public interface IObserver<T>
         {
-            public virtual void Update(T data) { }
+            void Update(T data);
         }
 
         public class Observable<T>
         {
-            private List<Observer<T>> observers = new List<Observer<T>>();
+            private List<IObserver<T>> observers = new List<IObserver<T>>();
             private T subject;
 
             public T Subject
@@ -64,7 +61,7 @@ namespace Example_3
                 }
             }
 
-            public Unsubscriber<T> Subscribe(Observer<T> observer)
+            public Unsubscriber<T> Subscribe(IObserver<T> observer)
             {
                 if(!observers.Contains(observer))
                     observers.Add(observer);
@@ -82,10 +79,10 @@ namespace Example_3
 
         public class Unsubscriber<T> : IDisposable
         {
-            private List<Observer<T>> observers;
-            private Observer<T> observer;
+            private List<IObserver<T>> observers;
+            private IObserver<T> observer;
 
-            public Unsubscriber(List<Observer<T>> observers, Observer<T> observer)
+            public Unsubscriber(List<IObserver<T>> observers, IObserver<T> observer)
             {
                 this.observers = observers;
                 this.observer = observer;

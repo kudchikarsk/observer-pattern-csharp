@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Example_2
 {
@@ -11,47 +8,59 @@ namespace Example_2
     {
         static void Main(string[] args)
         {
+            //This is our Observable also known as publisher that notifies about change
             var stockObservable = new Observable<Stock>();
 
+            //observer that monitors microsoft stock
             var microsoftObserver = new MicrosoftStockObserver();
+            //here microsoftObserver gets register with stockObservable 
+            //as microsoftObserver wants to get notified when there is a 
+            //change made inside the subject.
             stockObservable.Register(microsoftObserver);
 
+            //observer that monitors google stock
             var googleObserver = new GoogleStockObserver();
+            //here googleObserver gets register with stockObservable 
+            //as googleObserver wants to get notified when there is a 
+            //change made inside the subject.
             stockObservable.Register(googleObserver);
 
+            //our same old simulator
             var stockSimulator = new StockSimulator();
+            //code that updates the subject
             foreach (var stock in stockSimulator)
-                stockObservable.Subject = stock;
+                stockObservable.Subject = stock; //this will cause for 
 
             Console.ReadLine();
         }
 
-        public class GoogleStockObserver : Observer<Stock>
+        public class GoogleStockObserver : IObserver<Stock>
         {
-            public override void Update(Stock data)
+            public void Update(Stock data)
             {
                 if (data.Name == "Google" && data.Price > 50)
                     Console.WriteLine($"Google has reached the target price {data.Price}");
             }
         }
 
-        public class MicrosoftStockObserver : Observer<Stock>
+        public class MicrosoftStockObserver : IObserver<Stock>
         {
-            public override void Update(Stock data)
+            public void Update(Stock data)
             {
                 if (data.Name == "Microsoft")
                     Console.WriteLine($"Microsoft new price is {data.Price}");
             }
         }
 
-        public class Observer<T>
+        //An generic interface for Observers specifying how they should be updated
+        public interface IObserver<T>
         {
-            public virtual void Update(T data) { }            
+            void Update(T data);           
         }
 
         public class Observable<T>
         {
-            private List<Observer<T>> observers = new List<Observer<T>>();
+            private List<IObserver<T>> observers = new List<IObserver<T>>();
             private T subject;
 
             public T Subject
@@ -64,12 +73,12 @@ namespace Example_2
                 }
             }
 
-            public void Register(Observer<T> observer)
+            public void Register(IObserver<T> observer)
             {
                 observers.Add(observer);
             }
 
-            public void Unregister(Observer<T> observer)
+            public void Unregister(IObserver<T> observer)
             {
                 observers.Remove(observer);
             }
