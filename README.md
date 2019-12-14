@@ -1,6 +1,6 @@
 # Observer Pattern C# Demo
 
-This solution is a part of my blog post [Observer Pattern C#](https://kudchikarsk.com/observer-pattern-csharp/)
+This solution is a part of my blog post [Observer Pattern C#](https://codewithshadman.com/observer-pattern-csharp/)
 
 
 Solution contains various Windows Forms App / Console App Project for different Observer Pattern concepts in C#.
